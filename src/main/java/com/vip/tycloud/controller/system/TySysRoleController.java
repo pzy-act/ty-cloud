@@ -4,9 +4,11 @@ import com.vip.tycloud.common.dto.ApiResponse;
 import com.vip.tycloud.common.dto.PageQueryReqDTO;
 import com.vip.tycloud.common.dto.PageResultDTO;
 import com.vip.tycloud.dto.system.TySysRoleCreateReqDTO;
+import com.vip.tycloud.dto.system.TySysRoleMenuAssignReqDTO;
 import com.vip.tycloud.dto.system.TySysRoleRespDTO;
 import com.vip.tycloud.dto.system.TySysRoleUpdateReqDTO;
 import com.vip.tycloud.entity.system.TySysRole;
+import com.vip.tycloud.service.system.TySysRoleMenuService;
 import com.vip.tycloud.service.system.TySysRoleService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -32,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TySysRoleController {
 
     private final TySysRoleService tySysRoleService;
+    private final TySysRoleMenuService tySysRoleMenuService;
 
     /**
      * 新增数据。
@@ -95,6 +98,31 @@ public class TySysRoleController {
     ) {
         Long actualOperatorId = Objects.isNull(operatorId) ? 0L : operatorId;
         return ApiResponse.success(tySysRoleService.deleteById(id, actualOperatorId));
+    }
+
+    /**
+     * 查询角色已授权菜单 ID。
+     *
+     * @param roleId 角色 ID
+     * @return 菜单 ID 列表
+     */
+    @GetMapping("/{roleId}/menus")
+    public ApiResponse<List<Long>> roleMenus(@PathVariable Long roleId) {
+        return ApiResponse.success(tySysRoleMenuService.listMenuIdsByRoleId(roleId));
+    }
+
+    /**
+     * 保存角色菜单授权。
+     *
+     * @param req 授权参数
+     * @return 是否成功
+     */
+    @PostMapping("/assign-menus")
+    public ApiResponse<Boolean> assignMenus(@Valid @RequestBody TySysRoleMenuAssignReqDTO req) {
+        Long actualOperatorId = Objects.isNull(req.getOperatorId()) ? 0L : req.getOperatorId();
+        return ApiResponse.success(
+            tySysRoleMenuService.assignMenus(req.getRoleId(), req.getMenuIds(), actualOperatorId)
+        );
     }
 
     private TySysRole toEntity(TySysRoleCreateReqDTO req) {

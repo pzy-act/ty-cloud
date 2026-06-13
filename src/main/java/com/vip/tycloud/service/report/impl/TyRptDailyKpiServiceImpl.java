@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.vip.tycloud.common.dto.PageResultDTO;
+import com.vip.tycloud.util.PageQueryUtils;
 import com.vip.tycloud.entity.report.TyRptDailyKpi;
 import com.vip.tycloud.repository.report.TyRptDailyKpiRepository;
 import com.vip.tycloud.service.report.TyRptDailyKpiService;
@@ -29,19 +30,16 @@ public class TyRptDailyKpiServiceImpl implements TyRptDailyKpiService {
     }
 
     @Override
-    public PageResultDTO<TyRptDailyKpi> page(Integer pageNumber, Integer pageSize) {
+    public PageResultDTO<TyRptDailyKpi> page(Integer pageNumber, Integer pageSize, String keyword, Integer status) {
         long current = Objects.isNull(pageNumber) || pageNumber < 1 ? 1L : pageNumber;
         long size = Objects.isNull(pageSize) || pageSize < 1 ? 10L : pageSize;
         Page<TyRptDailyKpi> page = new Page<>(current, size);
         IPage<TyRptDailyKpi> pageResult = tyRptDailyKpiRepository.page(
             page,
-            Wrappers.<TyRptDailyKpi>lambdaQuery()
-                .eq(TyRptDailyKpi::getIsDeleted, 0)
-                .orderByDesc(TyRptDailyKpi::getId)
+            PageQueryUtils.baseQuery(keyword, status, null)
         );
         return PageResultDTO.of(pageResult.getTotal(), pageResult.getRecords());
     }
-
     @Override
     public boolean save(TyRptDailyKpi entity) {
         if (Objects.isNull(entity)) {

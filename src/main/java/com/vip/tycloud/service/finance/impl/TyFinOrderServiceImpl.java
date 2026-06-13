@@ -1,15 +1,19 @@
 package com.vip.tycloud.service.finance.impl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.vip.tycloud.common.dto.PageResultDTO;
+import com.vip.tycloud.common.enums.TyOrderStatusEnum;
 import com.vip.tycloud.entity.finance.TyFinOrder;
 import com.vip.tycloud.repository.finance.TyFinOrderRepository;
+import com.vip.tycloud.util.StatusTransitionUtils;
 import com.vip.tycloud.service.finance.TyFinOrderService;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 /**
  * 收费与订单 功能模块 - 收费订单 - 服务实现类。
@@ -29,15 +33,24 @@ public class TyFinOrderServiceImpl implements TyFinOrderService {
     }
 
     @Override
-    public PageResultDTO<TyFinOrder> page(Integer pageNumber, Integer pageSize) {
+    public PageResultDTO<TyFinOrder> page(Integer pageNumber, Integer pageSize, String keyword, Integer status) {
         long current = Objects.isNull(pageNumber) || pageNumber < 1 ? 1L : pageNumber;
         long size = Objects.isNull(pageSize) || pageSize < 1 ? 10L : pageSize;
         Page<TyFinOrder> page = new Page<>(current, size);
+        LambdaQueryWrapper<TyFinOrder> queryWrapper = Wrappers.<TyFinOrder>lambdaQuery()
+            .eq(TyFinOrder::getIsDeleted, 0)
+            .eq(Objects.nonNull(status), TyFinOrder::getStatus, status);
+        if (StringUtils.hasText(keyword)) {
+            String actualKeyword = keyword.trim();
+            queryWrapper.and(wrapper -> wrapper
+                .like(TyFinOrder::getOrderNo, actualKeyword)
+                .or()
+                .like(TyFinOrder::getBusinessType, actualKeyword)
+            );
+        }
         IPage<TyFinOrder> pageResult = tyFinOrderRepository.page(
             page,
-            Wrappers.<TyFinOrder>lambdaQuery()
-                .eq(TyFinOrder::getIsDeleted, 0)
-                .orderByDesc(TyFinOrder::getId)
+            queryWrapper.orderByDesc(TyFinOrder::getId)
         );
         return PageResultDTO.of(pageResult.getTotal(), pageResult.getRecords());
     }

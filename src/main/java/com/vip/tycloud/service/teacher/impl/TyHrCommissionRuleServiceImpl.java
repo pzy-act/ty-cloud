@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.vip.tycloud.common.dto.PageResultDTO;
+import com.vip.tycloud.common.enums.TyBaseStatusEnum;
+import com.vip.tycloud.util.PageQueryUtils;
+import com.vip.tycloud.util.StatusTransitionUtils;
 import com.vip.tycloud.entity.teacher.TyHrCommissionRule;
 import com.vip.tycloud.repository.teacher.TyHrCommissionRuleRepository;
 import com.vip.tycloud.service.teacher.TyHrCommissionRuleService;
@@ -29,19 +32,16 @@ public class TyHrCommissionRuleServiceImpl implements TyHrCommissionRuleService 
     }
 
     @Override
-    public PageResultDTO<TyHrCommissionRule> page(Integer pageNumber, Integer pageSize) {
+    public PageResultDTO<TyHrCommissionRule> page(Integer pageNumber, Integer pageSize, String keyword, Integer status) {
         long current = Objects.isNull(pageNumber) || pageNumber < 1 ? 1L : pageNumber;
         long size = Objects.isNull(pageSize) || pageSize < 1 ? 10L : pageSize;
         Page<TyHrCommissionRule> page = new Page<>(current, size);
         IPage<TyHrCommissionRule> pageResult = tyHrCommissionRuleRepository.page(
             page,
-            Wrappers.<TyHrCommissionRule>lambdaQuery()
-                .eq(TyHrCommissionRule::getIsDeleted, 0)
-                .orderByDesc(TyHrCommissionRule::getId)
+            PageQueryUtils.baseQuery(keyword, status, "status", "rule_name", "rule_type", "calc_formula")
         );
         return PageResultDTO.of(pageResult.getTotal(), pageResult.getRecords());
     }
-
     @Override
     public boolean save(TyHrCommissionRule entity) {
         if (Objects.isNull(entity)) {

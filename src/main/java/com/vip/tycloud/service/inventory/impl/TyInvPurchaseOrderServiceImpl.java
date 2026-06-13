@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.vip.tycloud.common.dto.PageResultDTO;
+import com.vip.tycloud.common.enums.TyPurchaseOrderStatusEnum;
+import com.vip.tycloud.util.PageQueryUtils;
+import com.vip.tycloud.util.StatusTransitionUtils;
 import com.vip.tycloud.entity.inventory.TyInvPurchaseOrder;
 import com.vip.tycloud.repository.inventory.TyInvPurchaseOrderRepository;
 import com.vip.tycloud.service.inventory.TyInvPurchaseOrderService;
@@ -29,19 +32,16 @@ public class TyInvPurchaseOrderServiceImpl implements TyInvPurchaseOrderService 
     }
 
     @Override
-    public PageResultDTO<TyInvPurchaseOrder> page(Integer pageNumber, Integer pageSize) {
+    public PageResultDTO<TyInvPurchaseOrder> page(Integer pageNumber, Integer pageSize, String keyword, Integer status) {
         long current = Objects.isNull(pageNumber) || pageNumber < 1 ? 1L : pageNumber;
         long size = Objects.isNull(pageSize) || pageSize < 1 ? 10L : pageSize;
         Page<TyInvPurchaseOrder> page = new Page<>(current, size);
         IPage<TyInvPurchaseOrder> pageResult = tyInvPurchaseOrderRepository.page(
             page,
-            Wrappers.<TyInvPurchaseOrder>lambdaQuery()
-                .eq(TyInvPurchaseOrder::getIsDeleted, 0)
-                .orderByDesc(TyInvPurchaseOrder::getId)
+            PageQueryUtils.baseQuery(keyword, status, "status", "po_no")
         );
         return PageResultDTO.of(pageResult.getTotal(), pageResult.getRecords());
     }
-
     @Override
     public boolean save(TyInvPurchaseOrder entity) {
         if (Objects.isNull(entity)) {

@@ -4,12 +4,19 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.vip.tycloud.common.dto.PageResultDTO;
+import com.vip.tycloud.entity.student.TyCrmLead;
 import com.vip.tycloud.entity.student.TyCrmLeadFollow;
 import com.vip.tycloud.repository.student.TyCrmLeadFollowRepository;
+import com.vip.tycloud.service.student.TyCrmLeadService;
 import com.vip.tycloud.service.student.TyCrmLeadFollowService;
+import com.vip.tycloud.util.SecurityContextUtils;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 学员管理 功能模块 - 线索跟进 - 服务实现类。
@@ -19,6 +26,8 @@ import org.springframework.stereotype.Service;
 public class TyCrmLeadFollowServiceImpl implements TyCrmLeadFollowService {
 
     private final TyCrmLeadFollowRepository tyCrmLeadFollowRepository;
+
+    private final TyCrmLeadService tyCrmLeadService;
 
     @Override
     public TyCrmLeadFollow getById(Long id) {
@@ -43,6 +52,21 @@ public class TyCrmLeadFollowServiceImpl implements TyCrmLeadFollowService {
     }
 
     @Override
+    public List<TyCrmLeadFollow> listByLeadId(Long leadId) {
+        if (Objects.isNull(leadId)) {
+            return Collections.emptyList();
+        }
+        return tyCrmLeadFollowRepository.list(
+            Wrappers.<TyCrmLeadFollow>lambdaQuery()
+                .eq(TyCrmLeadFollow::getLeadId, leadId)
+                .eq(TyCrmLeadFollow::getIsDeleted, 0)
+                .orderByDesc(TyCrmLeadFollow::getFollowTime)
+                .orderByDesc(TyCrmLeadFollow::getId)
+        );
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean save(TyCrmLeadFollow entity) {
         if (Objects.isNull(entity)) {
             return false;
@@ -51,15 +75,29 @@ public class TyCrmLeadFollowServiceImpl implements TyCrmLeadFollowService {
         if (Objects.isNull(entity.getIsDeleted())) {
             entity.setIsDeleted(0);
         }
-        return tyCrmLeadFollowRepository.save(entity) > 0;
+        if (Objects.isNull(entity.getFollowTime())) {
+            entity.setFollowTime(LocalDateTime.now());
+        }
+        fillCurrentOperator(entity);
+        boolean saved = tyCrmLeadFollowRepository.save(entity) > 0;
+        if (saved) {
+            syncLeadNextFollowTime(entity);
+        }
+        return saved;
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean updateById(TyCrmLeadFollow entity) {
         if (Objects.isNull(entity) || Objects.isNull(entity.getId())) {
             return false;
         }
-        return tyCrmLeadFollowRepository.updateById(entity) > 0;
+        fillCurrentOperator(entity);
+        boolean updated = tyCrmLeadFollowRepository.updateById(entity) > 0;
+        if (updated) {
+            syncLeadNextFollowTime(entity);
+        }
+        return updated;
     }
 
     @Override
@@ -69,6 +107,27 @@ public class TyCrmLeadFollowServiceImpl implements TyCrmLeadFollowService {
         }
         Long actualOperatorId = Objects.isNull(operatorId) ? 0L : operatorId;
         return tyCrmLeadFollowRepository.logicDeleteById(id, actualOperatorId) > 0;
+    }
+
+    private void syncLeadNextFollowTime(TyCrmLeadFollow entity) {
+        if (Objects.isNull(entity.getLeadId()) || Objects.isNull(entity.getNextFollowTime())) {
+            return;
+        }
+        TyCrmLead lead = new TyCrmLead();
+        lead.setId(entity.getLeadId());
+        lead.setNextFollowTime(entity.getNextFollowTime());
+        tyCrmLeadService.updateById(lead);
+    }
+
+    private void fillCurrentOperator(TyCrmLeadFollow entity) {
+        Long currentUserId = SecurityContextUtils.getCurrentUserId();
+        if (Objects.nonNull(currentUserId)) {
+            entity.setFollowerId(currentUserId);
+        }
+        Long currentCampusId = SecurityContextUtils.getCurrentCampusId();
+        if (Objects.nonNull(currentCampusId) && Objects.isNull(entity.getCampusId())) {
+            entity.setCampusId(currentCampusId);
+        }
     }
 }
 

@@ -2,6 +2,7 @@ package com.vip.tycloud.service.system;
 
 import com.vip.tycloud.common.dto.PageResultDTO;
 import com.vip.tycloud.entity.system.TySysRoleMenu;
+import java.util.List;
 
 /**
  * 组织与权限 功能模块 - 角色菜单关联 - 服务接口。
@@ -49,6 +50,24 @@ public interface TySysRoleMenuService {
      * @return 是否成功
      */
     boolean deleteById(Long id, Long operatorId);
+
+    /**
+     * 查询角色已授权菜单 ID。
+     *
+     * @param roleId 角色 ID
+     * @return 菜单 ID 列表
+     */
+    List<Long> listMenuIdsByRoleId(Long roleId);
+
+    /**
+     * 保存角色菜单授权。
+     *
+     * @param roleId 角色 ID
+     * @param menuIds 菜单 ID 列表
+     * @param operatorId 操作人 ID
+     * @return 是否成功
+     */
+    boolean assignMenus(Long roleId, List<Long> menuIds, Long operatorId);
 }
 
 

@@ -7,6 +7,8 @@ import com.vip.tycloud.common.dto.PageResultDTO;
 import com.vip.tycloud.entity.student.TyStuStudentTag;
 import com.vip.tycloud.repository.student.TyStuStudentTagRepository;
 import com.vip.tycloud.service.student.TyStuStudentTagService;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -43,6 +45,19 @@ public class TyStuStudentTagServiceImpl implements TyStuStudentTagService {
     }
 
     @Override
+    public List<TyStuStudentTag> listByStudentId(Long studentId) {
+        if (Objects.isNull(studentId)) {
+            return Collections.emptyList();
+        }
+        return tyStuStudentTagRepository.list(
+            Wrappers.<TyStuStudentTag>lambdaQuery()
+                .eq(TyStuStudentTag::getStudentId, studentId)
+                .eq(TyStuStudentTag::getIsDeleted, 0)
+                .orderByDesc(TyStuStudentTag::getId)
+        );
+    }
+
+    @Override
     public boolean save(TyStuStudentTag entity) {
         if (Objects.isNull(entity)) {
             return false;
@@ -52,6 +67,23 @@ public class TyStuStudentTagServiceImpl implements TyStuStudentTagService {
             entity.setIsDeleted(0);
         }
         return tyStuStudentTagRepository.save(entity) > 0;
+    }
+
+    @Override
+    public boolean bind(TyStuStudentTag entity) {
+        if (Objects.isNull(entity) || Objects.isNull(entity.getStudentId()) || Objects.isNull(entity.getTagId())) {
+            return false;
+        }
+        List<TyStuStudentTag> existingRelations = tyStuStudentTagRepository.list(
+            Wrappers.<TyStuStudentTag>lambdaQuery()
+                .eq(TyStuStudentTag::getStudentId, entity.getStudentId())
+                .eq(TyStuStudentTag::getTagId, entity.getTagId())
+                .eq(TyStuStudentTag::getIsDeleted, 0)
+        );
+        if (!existingRelations.isEmpty()) {
+            return true;
+        }
+        return save(entity);
     }
 
     @Override

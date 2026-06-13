@@ -2,6 +2,7 @@ package com.vip.tycloud.service.student;
 
 import com.vip.tycloud.common.dto.PageResultDTO;
 import com.vip.tycloud.entity.student.TyStuStudentGuardian;
+import java.util.List;
 
 /**
  * 学员管理 功能模块 - 学员监护关系 - 服务接口。
@@ -26,12 +27,28 @@ public interface TyStuStudentGuardianService {
     PageResultDTO<TyStuStudentGuardian> page(Integer pageNumber, Integer pageSize);
 
     /**
+     * Query guardian relations by student ID.
+     *
+     * @param studentId student ID
+     * @return relation list
+     */
+    List<TyStuStudentGuardian> listByStudentId(Long studentId);
+
+    /**
      * 新增数据。
      *
      * @param entity 实体对象
      * @return 是否成功
      */
     boolean save(TyStuStudentGuardian entity);
+
+    /**
+     * Bind guardian to student.
+     *
+     * @param entity relation entity
+     * @return whether success
+     */
+    boolean bind(TyStuStudentGuardian entity);
 
     /**
      * 按主键更新。

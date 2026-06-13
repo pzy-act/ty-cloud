@@ -1,7 +1,7 @@
 package com.vip.tycloud.controller.message;
 
 import com.vip.tycloud.common.dto.ApiResponse;
-import com.vip.tycloud.common.dto.PageQueryReqDTO;
+import com.vip.tycloud.common.dto.PageFilterReqDTO;
 import com.vip.tycloud.common.dto.PageResultDTO;
 import com.vip.tycloud.dto.message.TyMsgTemplateCreateReqDTO;
 import com.vip.tycloud.dto.message.TyMsgTemplateRespDTO;
@@ -73,8 +73,8 @@ public class TyMsgTemplateController {
      * @return 分页结果
      */
     @PostMapping("/page")
-    public ApiResponse<PageResultDTO<TyMsgTemplateRespDTO>> page(@Valid @RequestBody PageQueryReqDTO req) {
-        PageResultDTO<TyMsgTemplate> pageResult = tyMsgTemplateService.page(req.getPageNumber(), req.getPageSize());
+    public ApiResponse<PageResultDTO<TyMsgTemplateRespDTO>> page(@Valid @RequestBody PageFilterReqDTO req) {
+        PageResultDTO<TyMsgTemplate> pageResult = tyMsgTemplateService.page(req.getPageNumber(), req.getPageSize(), req.getKeyword(), req.getStatus());
         List<TyMsgTemplateRespDTO> records = pageResult.getRecords().stream()
             .map(this::toRespDTO)
             .collect(Collectors.toList());

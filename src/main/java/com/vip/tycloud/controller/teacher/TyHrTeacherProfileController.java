@@ -9,9 +9,7 @@ import com.vip.tycloud.dto.teacher.TyHrTeacherProfileUpdateReqDTO;
 import com.vip.tycloud.entity.teacher.TyHrTeacherProfile;
 import com.vip.tycloud.service.teacher.TyHrTeacherProfileService;
 import jakarta.validation.Valid;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -63,7 +61,7 @@ public class TyHrTeacherProfileController {
      */
     @GetMapping("/detail/{id}")
     public ApiResponse<TyHrTeacherProfileRespDTO> detail(@PathVariable Long id) {
-        return ApiResponse.success(toRespDTO(tyHrTeacherProfileService.getById(id)));
+        return ApiResponse.success(tyHrTeacherProfileService.getRespById(id));
     }
 
     /**
@@ -74,11 +72,7 @@ public class TyHrTeacherProfileController {
      */
     @PostMapping("/page")
     public ApiResponse<PageResultDTO<TyHrTeacherProfileRespDTO>> page(@Valid @RequestBody PageQueryReqDTO req) {
-        PageResultDTO<TyHrTeacherProfile> pageResult = tyHrTeacherProfileService.page(req.getPageNumber(), req.getPageSize());
-        List<TyHrTeacherProfileRespDTO> records = pageResult.getRecords().stream()
-            .map(this::toRespDTO)
-            .collect(Collectors.toList());
-        return ApiResponse.success(PageResultDTO.of(pageResult.getTotal(), records));
+        return ApiResponse.success(tyHrTeacherProfileService.pageResp(req.getPageNumber(), req.getPageSize()));
     }
 
     /**
@@ -109,14 +103,6 @@ public class TyHrTeacherProfileController {
         return entity;
     }
 
-    private TyHrTeacherProfileRespDTO toRespDTO(TyHrTeacherProfile entity) {
-        if (Objects.isNull(entity)) {
-            return null;
-        }
-        TyHrTeacherProfileRespDTO respDTO = new TyHrTeacherProfileRespDTO();
-        BeanUtils.copyProperties(entity, respDTO);
-        return respDTO;
-    }
 }
 
 

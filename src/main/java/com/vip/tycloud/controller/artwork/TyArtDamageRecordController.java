@@ -1,7 +1,7 @@
 package com.vip.tycloud.controller.artwork;
 
 import com.vip.tycloud.common.dto.ApiResponse;
-import com.vip.tycloud.common.dto.PageQueryReqDTO;
+import com.vip.tycloud.common.dto.PageFilterReqDTO;
 import com.vip.tycloud.common.dto.PageResultDTO;
 import com.vip.tycloud.dto.artwork.TyArtDamageRecordCreateReqDTO;
 import com.vip.tycloud.dto.artwork.TyArtDamageRecordRespDTO;
@@ -73,8 +73,8 @@ public class TyArtDamageRecordController {
      * @return 分页结果
      */
     @PostMapping("/page")
-    public ApiResponse<PageResultDTO<TyArtDamageRecordRespDTO>> page(@Valid @RequestBody PageQueryReqDTO req) {
-        PageResultDTO<TyArtDamageRecord> pageResult = tyArtDamageRecordService.page(req.getPageNumber(), req.getPageSize());
+    public ApiResponse<PageResultDTO<TyArtDamageRecordRespDTO>> page(@Valid @RequestBody PageFilterReqDTO req) {
+        PageResultDTO<TyArtDamageRecord> pageResult = tyArtDamageRecordService.page(req.getPageNumber(), req.getPageSize(), req.getKeyword(), req.getStatus());
         List<TyArtDamageRecordRespDTO> records = pageResult.getRecords().stream()
             .map(this::toRespDTO)
             .collect(Collectors.toList());

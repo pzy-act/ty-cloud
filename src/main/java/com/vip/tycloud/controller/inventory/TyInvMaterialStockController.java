@@ -1,7 +1,7 @@
 package com.vip.tycloud.controller.inventory;
 
 import com.vip.tycloud.common.dto.ApiResponse;
-import com.vip.tycloud.common.dto.PageQueryReqDTO;
+import com.vip.tycloud.common.dto.PageFilterReqDTO;
 import com.vip.tycloud.common.dto.PageResultDTO;
 import com.vip.tycloud.dto.inventory.TyInvMaterialStockCreateReqDTO;
 import com.vip.tycloud.dto.inventory.TyInvMaterialStockRespDTO;
@@ -73,8 +73,8 @@ public class TyInvMaterialStockController {
      * @return 分页结果
      */
     @PostMapping("/page")
-    public ApiResponse<PageResultDTO<TyInvMaterialStockRespDTO>> page(@Valid @RequestBody PageQueryReqDTO req) {
-        PageResultDTO<TyInvMaterialStock> pageResult = tyInvMaterialStockService.page(req.getPageNumber(), req.getPageSize());
+    public ApiResponse<PageResultDTO<TyInvMaterialStockRespDTO>> page(@Valid @RequestBody PageFilterReqDTO req) {
+        PageResultDTO<TyInvMaterialStock> pageResult = tyInvMaterialStockService.page(req.getPageNumber(), req.getPageSize(), req.getKeyword(), req.getStatus());
         List<TyInvMaterialStockRespDTO> records = pageResult.getRecords().stream()
             .map(this::toRespDTO)
             .collect(Collectors.toList());

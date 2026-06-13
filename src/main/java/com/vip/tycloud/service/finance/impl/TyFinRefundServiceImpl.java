@@ -1,15 +1,19 @@
 package com.vip.tycloud.service.finance.impl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.vip.tycloud.common.dto.PageResultDTO;
+import com.vip.tycloud.common.enums.TyRefundStatusEnum;
 import com.vip.tycloud.entity.finance.TyFinRefund;
 import com.vip.tycloud.repository.finance.TyFinRefundRepository;
+import com.vip.tycloud.util.StatusTransitionUtils;
 import com.vip.tycloud.service.finance.TyFinRefundService;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 /**
  * 收费与订单 功能模块 - 退款记录 - 服务实现类。
@@ -29,15 +33,24 @@ public class TyFinRefundServiceImpl implements TyFinRefundService {
     }
 
     @Override
-    public PageResultDTO<TyFinRefund> page(Integer pageNumber, Integer pageSize) {
+    public PageResultDTO<TyFinRefund> page(Integer pageNumber, Integer pageSize, String keyword, Integer status) {
         long current = Objects.isNull(pageNumber) || pageNumber < 1 ? 1L : pageNumber;
         long size = Objects.isNull(pageSize) || pageSize < 1 ? 10L : pageSize;
         Page<TyFinRefund> page = new Page<>(current, size);
+        LambdaQueryWrapper<TyFinRefund> queryWrapper = Wrappers.<TyFinRefund>lambdaQuery()
+            .eq(TyFinRefund::getIsDeleted, 0)
+            .eq(Objects.nonNull(status), TyFinRefund::getStatus, status);
+        if (StringUtils.hasText(keyword)) {
+            String actualKeyword = keyword.trim();
+            queryWrapper.and(wrapper -> wrapper
+                .like(TyFinRefund::getRefundNo, actualKeyword)
+                .or()
+                .like(TyFinRefund::getReason, actualKeyword)
+            );
+        }
         IPage<TyFinRefund> pageResult = tyFinRefundRepository.page(
             page,
-            Wrappers.<TyFinRefund>lambdaQuery()
-                .eq(TyFinRefund::getIsDeleted, 0)
-                .orderByDesc(TyFinRefund::getId)
+            queryWrapper.orderByDesc(TyFinRefund::getId)
         );
         return PageResultDTO.of(pageResult.getTotal(), pageResult.getRecords());
     }

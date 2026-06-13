@@ -5,8 +5,10 @@ import com.vip.tycloud.common.dto.PageQueryReqDTO;
 import com.vip.tycloud.common.dto.PageResultDTO;
 import com.vip.tycloud.dto.system.TySysUserCreateReqDTO;
 import com.vip.tycloud.dto.system.TySysUserRespDTO;
+import com.vip.tycloud.dto.system.TySysUserRoleAssignReqDTO;
 import com.vip.tycloud.dto.system.TySysUserUpdateReqDTO;
 import com.vip.tycloud.entity.system.TySysUser;
+import com.vip.tycloud.service.system.TySysUserRoleService;
 import com.vip.tycloud.service.system.TySysUserService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -14,6 +16,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,6 +36,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class TySysUserController {
 
     private final TySysUserService tySysUserService;
+    private final TySysUserRoleService tySysUserRoleService;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * 新增数据。
@@ -100,13 +106,32 @@ public class TySysUserController {
     private TySysUser toEntity(TySysUserCreateReqDTO req) {
         TySysUser entity = new TySysUser();
         BeanUtils.copyProperties(req, entity);
+        if (StringUtils.hasText(req.getPassword())) {
+            entity.setPasswordHash(passwordEncoder.encode(req.getPassword()));
+        }
         return entity;
     }
 
     private TySysUser toEntity(TySysUserUpdateReqDTO req) {
         TySysUser entity = new TySysUser();
         BeanUtils.copyProperties(req, entity);
+        if (StringUtils.hasText(req.getPassword())) {
+            entity.setPasswordHash(passwordEncoder.encode(req.getPassword()));
+        } else if (!StringUtils.hasText(req.getPasswordHash())) {
+            entity.setPasswordHash(null);
+        }
         return entity;
+    }
+
+    @GetMapping("/{userId}/roles")
+    public ApiResponse<List<Long>> userRoles(@PathVariable Long userId) {
+        return ApiResponse.success(tySysUserRoleService.listRoleIdsByUserId(userId));
+    }
+
+    @PostMapping("/assign-roles")
+    public ApiResponse<Boolean> assignRoles(@Valid @RequestBody TySysUserRoleAssignReqDTO req) {
+        Long actualOperatorId = Objects.isNull(req.getOperatorId()) ? 0L : req.getOperatorId();
+        return ApiResponse.success(tySysUserRoleService.assignRoles(req.getUserId(), req.getRoleIds(), actualOperatorId));
     }
 
     private TySysUserRespDTO toRespDTO(TySysUser entity) {

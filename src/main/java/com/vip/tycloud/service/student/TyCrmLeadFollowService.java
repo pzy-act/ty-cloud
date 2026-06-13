@@ -2,6 +2,7 @@ package com.vip.tycloud.service.student;
 
 import com.vip.tycloud.common.dto.PageResultDTO;
 import com.vip.tycloud.entity.student.TyCrmLeadFollow;
+import java.util.List;
 
 /**
  * 学员管理 功能模块 - 线索跟进 - 服务接口。
@@ -24,6 +25,14 @@ public interface TyCrmLeadFollowService {
      * @return 分页结果
      */
     PageResultDTO<TyCrmLeadFollow> page(Integer pageNumber, Integer pageSize);
+
+    /**
+     * Query follow records by lead id.
+     *
+     * @param leadId lead id
+     * @return follow records
+     */
+    List<TyCrmLeadFollow> listByLeadId(Long leadId);
 
     /**
      * 新增数据。

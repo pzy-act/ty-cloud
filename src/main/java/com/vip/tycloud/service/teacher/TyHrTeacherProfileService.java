@@ -1,6 +1,7 @@
 package com.vip.tycloud.service.teacher;
 
 import com.vip.tycloud.common.dto.PageResultDTO;
+import com.vip.tycloud.dto.teacher.TyHrTeacherProfileRespDTO;
 import com.vip.tycloud.entity.teacher.TyHrTeacherProfile;
 
 /**
@@ -16,6 +17,8 @@ public interface TyHrTeacherProfileService {
      */
     TyHrTeacherProfile getById(Long id);
 
+    TyHrTeacherProfileRespDTO getRespById(Long id);
+
     /**
      * 分页查询。
      *
@@ -24,6 +27,8 @@ public interface TyHrTeacherProfileService {
      * @return 分页结果
      */
     PageResultDTO<TyHrTeacherProfile> page(Integer pageNumber, Integer pageSize);
+
+    PageResultDTO<TyHrTeacherProfileRespDTO> pageResp(Integer pageNumber, Integer pageSize);
 
     /**
      * 新增数据。

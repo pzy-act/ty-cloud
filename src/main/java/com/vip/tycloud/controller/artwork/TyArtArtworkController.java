@@ -1,7 +1,7 @@
 package com.vip.tycloud.controller.artwork;
 
 import com.vip.tycloud.common.dto.ApiResponse;
-import com.vip.tycloud.common.dto.PageQueryReqDTO;
+import com.vip.tycloud.common.dto.PageFilterReqDTO;
 import com.vip.tycloud.common.dto.PageResultDTO;
 import com.vip.tycloud.dto.artwork.TyArtArtworkCreateReqDTO;
 import com.vip.tycloud.dto.artwork.TyArtArtworkRespDTO;
@@ -73,8 +73,8 @@ public class TyArtArtworkController {
      * @return 分页结果
      */
     @PostMapping("/page")
-    public ApiResponse<PageResultDTO<TyArtArtworkRespDTO>> page(@Valid @RequestBody PageQueryReqDTO req) {
-        PageResultDTO<TyArtArtwork> pageResult = tyArtArtworkService.page(req.getPageNumber(), req.getPageSize());
+    public ApiResponse<PageResultDTO<TyArtArtworkRespDTO>> page(@Valid @RequestBody PageFilterReqDTO req) {
+        PageResultDTO<TyArtArtwork> pageResult = tyArtArtworkService.page(req.getPageNumber(), req.getPageSize(), req.getKeyword(), req.getStatus());
         List<TyArtArtworkRespDTO> records = pageResult.getRecords().stream()
             .map(this::toRespDTO)
             .collect(Collectors.toList());

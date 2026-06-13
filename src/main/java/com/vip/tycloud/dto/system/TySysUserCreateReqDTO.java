@@ -24,6 +24,8 @@ public class TySysUserCreateReqDTO {
      */
     private String passwordHash;
 
+    private String password;
+
     /**
      * 真实名称
      */

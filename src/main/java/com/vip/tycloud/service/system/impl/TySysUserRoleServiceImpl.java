@@ -7,8 +7,14 @@ import com.vip.tycloud.common.dto.PageResultDTO;
 import com.vip.tycloud.entity.system.TySysUserRole;
 import com.vip.tycloud.repository.system.TySysUserRoleRepository;
 import com.vip.tycloud.service.system.TySysUserRoleService;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 /**
@@ -40,6 +46,63 @@ public class TySysUserRoleServiceImpl implements TySysUserRoleService {
                 .orderByDesc(TySysUserRole::getId)
         );
         return PageResultDTO.of(pageResult.getTotal(), pageResult.getRecords());
+    }
+
+    @Override
+    public List<Long> listRoleIdsByUserId(Long userId) {
+        if (Objects.isNull(userId)) {
+            return Collections.emptyList();
+        }
+        List<TySysUserRole> userRoles = tySysUserRoleRepository.list(
+            Wrappers.<TySysUserRole>lambdaQuery()
+                .eq(TySysUserRole::getUserId, userId)
+                .eq(TySysUserRole::getIsDeleted, 0)
+        );
+        return userRoles.stream()
+            .map(TySysUserRole::getRoleId)
+            .filter(Objects::nonNull)
+            .distinct()
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean assignRoles(Long userId, List<Long> roleIds, Long operatorId) {
+        if (Objects.isNull(userId)) {
+            return false;
+        }
+        Long actualOperatorId = Objects.isNull(operatorId) ? 0L : operatorId;
+        LocalDateTime now = LocalDateTime.now();
+        List<TySysUserRole> oldRelations = tySysUserRoleRepository.list(
+            Wrappers.<TySysUserRole>lambdaQuery()
+                .eq(TySysUserRole::getUserId, userId)
+                .eq(TySysUserRole::getIsDeleted, 0)
+        );
+        for (TySysUserRole relation : oldRelations) {
+            relation.setIsDeleted(1);
+            relation.setUpdatedBy(actualOperatorId);
+            relation.setUpdatedTime(now);
+            tySysUserRoleRepository.updateById(relation);
+        }
+        if (CollectionUtils.isEmpty(roleIds)) {
+            return true;
+        }
+        List<Long> distinctRoleIds = roleIds.stream()
+            .filter(Objects::nonNull)
+            .distinct()
+            .collect(Collectors.toList());
+        for (Long roleId : distinctRoleIds) {
+            TySysUserRole relation = new TySysUserRole();
+            relation.setUserId(userId);
+            relation.setRoleId(roleId);
+            relation.setIsDeleted(0);
+            relation.setCreatedBy(actualOperatorId);
+            relation.setCreatedTime(now);
+            relation.setUpdatedBy(actualOperatorId);
+            relation.setUpdatedTime(now);
+            tySysUserRoleRepository.save(relation);
+        }
+        return true;
     }
 
     @Override

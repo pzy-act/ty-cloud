@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.vip.tycloud.common.dto.PageResultDTO;
+import com.vip.tycloud.common.enums.TyProgressStatusEnum;
+import com.vip.tycloud.util.PageQueryUtils;
+import com.vip.tycloud.util.StatusTransitionUtils;
 import com.vip.tycloud.entity.artwork.TyArtPickupRecord;
 import com.vip.tycloud.repository.artwork.TyArtPickupRecordRepository;
 import com.vip.tycloud.service.artwork.TyArtPickupRecordService;
@@ -29,19 +32,16 @@ public class TyArtPickupRecordServiceImpl implements TyArtPickupRecordService {
     }
 
     @Override
-    public PageResultDTO<TyArtPickupRecord> page(Integer pageNumber, Integer pageSize) {
+    public PageResultDTO<TyArtPickupRecord> page(Integer pageNumber, Integer pageSize, String keyword, Integer status) {
         long current = Objects.isNull(pageNumber) || pageNumber < 1 ? 1L : pageNumber;
         long size = Objects.isNull(pageSize) || pageSize < 1 ? 10L : pageSize;
         Page<TyArtPickupRecord> page = new Page<>(current, size);
         IPage<TyArtPickupRecord> pageResult = tyArtPickupRecordRepository.page(
             page,
-            Wrappers.<TyArtPickupRecord>lambdaQuery()
-                .eq(TyArtPickupRecord::getIsDeleted, 0)
-                .orderByDesc(TyArtPickupRecord::getId)
+            PageQueryUtils.baseQuery(keyword, status, "status", "receiver_name", "receiver_mobile")
         );
         return PageResultDTO.of(pageResult.getTotal(), pageResult.getRecords());
     }
-
     @Override
     public boolean save(TyArtPickupRecord entity) {
         if (Objects.isNull(entity)) {

@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.vip.tycloud.common.dto.PageResultDTO;
+import com.vip.tycloud.common.enums.TyPayrollStatusEnum;
+import com.vip.tycloud.util.PageQueryUtils;
+import com.vip.tycloud.util.StatusTransitionUtils;
 import com.vip.tycloud.entity.teacher.TyHrTeacherPayroll;
 import com.vip.tycloud.repository.teacher.TyHrTeacherPayrollRepository;
 import com.vip.tycloud.service.teacher.TyHrTeacherPayrollService;
@@ -29,19 +32,16 @@ public class TyHrTeacherPayrollServiceImpl implements TyHrTeacherPayrollService 
     }
 
     @Override
-    public PageResultDTO<TyHrTeacherPayroll> page(Integer pageNumber, Integer pageSize) {
+    public PageResultDTO<TyHrTeacherPayroll> page(Integer pageNumber, Integer pageSize, String keyword, Integer status) {
         long current = Objects.isNull(pageNumber) || pageNumber < 1 ? 1L : pageNumber;
         long size = Objects.isNull(pageSize) || pageSize < 1 ? 10L : pageSize;
         Page<TyHrTeacherPayroll> page = new Page<>(current, size);
         IPage<TyHrTeacherPayroll> pageResult = tyHrTeacherPayrollRepository.page(
             page,
-            Wrappers.<TyHrTeacherPayroll>lambdaQuery()
-                .eq(TyHrTeacherPayroll::getIsDeleted, 0)
-                .orderByDesc(TyHrTeacherPayroll::getId)
+            PageQueryUtils.baseQuery(keyword, status, "status", "payroll_month")
         );
         return PageResultDTO.of(pageResult.getTotal(), pageResult.getRecords());
     }
-
     @Override
     public boolean save(TyHrTeacherPayroll entity) {
         if (Objects.isNull(entity)) {

@@ -1,6 +1,7 @@
 package com.vip.tycloud.repository.system.impl;
 
 import com.vip.tycloud.common.repository.BaseRepositoryImpl;
+import com.vip.tycloud.entity.system.TySysMenu;
 import com.vip.tycloud.entity.system.TySysUser;
 import com.vip.tycloud.mapper.system.TySysUserMapper;
 import com.vip.tycloud.repository.system.TySysUserRepository;
@@ -45,6 +46,15 @@ public class TySysUserRepositoryImpl extends BaseRepositoryImpl<TySysUserMapper,
         }
         List<String> perms = baseMapper.selectPermsByUserId(userId);
         return Objects.isNull(perms) ? Collections.emptyList() : perms;
+    }
+
+    @Override
+    public List<TySysMenu> listMenusByUserId(Long userId) {
+        if (Objects.isNull(userId)) {
+            return Collections.emptyList();
+        }
+        List<TySysMenu> menus = baseMapper.selectMenusByUserId(userId);
+        return Objects.isNull(menus) ? Collections.emptyList() : menus;
     }
 
     @Override

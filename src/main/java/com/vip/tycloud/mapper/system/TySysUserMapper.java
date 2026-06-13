@@ -1,6 +1,7 @@
 package com.vip.tycloud.mapper.system;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.vip.tycloud.entity.system.TySysMenu;
 import com.vip.tycloud.entity.system.TySysUser;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -59,6 +60,27 @@ public interface TySysUserMapper extends BaseMapper<TySysUser> {
         + "AND m.perms IS NOT NULL "
         + "AND m.perms <> ''")
     List<String> selectPermsByUserId(@Param("userId") Long userId);
+
+    /**
+     * 查询用户授权菜单列表。
+     *
+     * @param userId 用户ID
+     * @return 授权菜单列表
+     */
+    @Select("SELECT DISTINCT m.id, m.campus_id, m.parent_id, m.menu_name, m.menu_type, "
+        + "m.route_path, m.component, m.perms, m.icon, m.sort_no, m.visible, m.status, "
+        + "m.is_deleted, m.created_by, m.created_time, m.updated_by, m.updated_time "
+        + "FROM ty_sys_user_role ur "
+        + "JOIN ty_sys_role_menu rm ON ur.role_id = rm.role_id "
+        + "JOIN ty_sys_menu m ON rm.menu_id = m.id "
+        + "WHERE ur.user_id = #{userId} "
+        + "AND ur.is_deleted = 0 "
+        + "AND rm.is_deleted = 0 "
+        + "AND m.is_deleted = 0 "
+        + "AND m.status = 1 "
+        + "AND m.visible = 1 "
+        + "ORDER BY m.parent_id ASC, m.sort_no ASC, m.id ASC")
+    List<TySysMenu> selectMenusByUserId(@Param("userId") Long userId);
 
     /**
      * 更新最近登录时间。

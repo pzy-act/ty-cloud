@@ -81,6 +81,15 @@ public class TyCrmLeadController {
         return ApiResponse.success(PageResultDTO.of(pageResult.getTotal(), records));
     }
 
+    @PostMapping("/{id}/convert-to-student")
+    public ApiResponse<Long> convertToStudent(@PathVariable Long id) {
+        Long studentId = tyCrmLeadService.convertToStudent(id);
+        if (Objects.isNull(studentId)) {
+            return ApiResponse.fail("线索转学员失败");
+        }
+        return ApiResponse.success(studentId);
+    }
+
     /**
      * 逻辑删除。
      *

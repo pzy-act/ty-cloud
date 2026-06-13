@@ -1,7 +1,7 @@
 package com.vip.tycloud.controller.teacher;
 
 import com.vip.tycloud.common.dto.ApiResponse;
-import com.vip.tycloud.common.dto.PageQueryReqDTO;
+import com.vip.tycloud.common.dto.PageFilterReqDTO;
 import com.vip.tycloud.common.dto.PageResultDTO;
 import com.vip.tycloud.dto.teacher.TyHrTeacherPayrollCreateReqDTO;
 import com.vip.tycloud.dto.teacher.TyHrTeacherPayrollRespDTO;
@@ -73,8 +73,8 @@ public class TyHrTeacherPayrollController {
      * @return 分页结果
      */
     @PostMapping("/page")
-    public ApiResponse<PageResultDTO<TyHrTeacherPayrollRespDTO>> page(@Valid @RequestBody PageQueryReqDTO req) {
-        PageResultDTO<TyHrTeacherPayroll> pageResult = tyHrTeacherPayrollService.page(req.getPageNumber(), req.getPageSize());
+    public ApiResponse<PageResultDTO<TyHrTeacherPayrollRespDTO>> page(@Valid @RequestBody PageFilterReqDTO req) {
+        PageResultDTO<TyHrTeacherPayroll> pageResult = tyHrTeacherPayrollService.page(req.getPageNumber(), req.getPageSize(), req.getKeyword(), req.getStatus());
         List<TyHrTeacherPayrollRespDTO> records = pageResult.getRecords().stream()
             .map(this::toRespDTO)
             .collect(Collectors.toList());

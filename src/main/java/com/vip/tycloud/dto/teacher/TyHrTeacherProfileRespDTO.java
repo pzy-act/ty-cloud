@@ -26,6 +26,14 @@ public class TyHrTeacherProfileRespDTO {
      */
     private Long userId;
 
+    private String username;
+
+    private String realName;
+
+    private String mobile;
+
+    private String jobNo;
+
     /**
      * 老师等级
      */

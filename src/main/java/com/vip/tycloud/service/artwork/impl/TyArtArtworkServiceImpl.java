@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.vip.tycloud.common.dto.PageResultDTO;
+import com.vip.tycloud.common.enums.TyArtworkStatusEnum;
+import com.vip.tycloud.util.PageQueryUtils;
+import com.vip.tycloud.util.StatusTransitionUtils;
 import com.vip.tycloud.entity.artwork.TyArtArtwork;
 import com.vip.tycloud.repository.artwork.TyArtArtworkRepository;
 import com.vip.tycloud.service.artwork.TyArtArtworkService;
@@ -29,19 +32,16 @@ public class TyArtArtworkServiceImpl implements TyArtArtworkService {
     }
 
     @Override
-    public PageResultDTO<TyArtArtwork> page(Integer pageNumber, Integer pageSize) {
+    public PageResultDTO<TyArtArtwork> page(Integer pageNumber, Integer pageSize, String keyword, Integer status) {
         long current = Objects.isNull(pageNumber) || pageNumber < 1 ? 1L : pageNumber;
         long size = Objects.isNull(pageSize) || pageSize < 1 ? 10L : pageSize;
         Page<TyArtArtwork> page = new Page<>(current, size);
         IPage<TyArtArtwork> pageResult = tyArtArtworkRepository.page(
             page,
-            Wrappers.<TyArtArtwork>lambdaQuery()
-                .eq(TyArtArtwork::getIsDeleted, 0)
-                .orderByDesc(TyArtArtwork::getId)
+            PageQueryUtils.baseQuery(keyword, status, "current_status", "artwork_no", "artwork_name", "clay_type", "size_spec")
         );
         return PageResultDTO.of(pageResult.getTotal(), pageResult.getRecords());
     }
-
     @Override
     public boolean save(TyArtArtwork entity) {
         if (Objects.isNull(entity)) {

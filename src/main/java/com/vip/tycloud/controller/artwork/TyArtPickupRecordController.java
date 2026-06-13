@@ -1,7 +1,7 @@
 package com.vip.tycloud.controller.artwork;
 
 import com.vip.tycloud.common.dto.ApiResponse;
-import com.vip.tycloud.common.dto.PageQueryReqDTO;
+import com.vip.tycloud.common.dto.PageFilterReqDTO;
 import com.vip.tycloud.common.dto.PageResultDTO;
 import com.vip.tycloud.dto.artwork.TyArtPickupRecordCreateReqDTO;
 import com.vip.tycloud.dto.artwork.TyArtPickupRecordRespDTO;
@@ -73,8 +73,8 @@ public class TyArtPickupRecordController {
      * @return 分页结果
      */
     @PostMapping("/page")
-    public ApiResponse<PageResultDTO<TyArtPickupRecordRespDTO>> page(@Valid @RequestBody PageQueryReqDTO req) {
-        PageResultDTO<TyArtPickupRecord> pageResult = tyArtPickupRecordService.page(req.getPageNumber(), req.getPageSize());
+    public ApiResponse<PageResultDTO<TyArtPickupRecordRespDTO>> page(@Valid @RequestBody PageFilterReqDTO req) {
+        PageResultDTO<TyArtPickupRecord> pageResult = tyArtPickupRecordService.page(req.getPageNumber(), req.getPageSize(), req.getKeyword(), req.getStatus());
         List<TyArtPickupRecordRespDTO> records = pageResult.getRecords().stream()
             .map(this::toRespDTO)
             .collect(Collectors.toList());

@@ -23,7 +23,7 @@ public interface TyArtGlazeRecordService {
      * @param pageSize 每页条数
      * @return 分页结果
      */
-    PageResultDTO<TyArtGlazeRecord> page(Integer pageNumber, Integer pageSize);
+    PageResultDTO<TyArtGlazeRecord> page(Integer pageNumber, Integer pageSize, String keyword, Integer status);
 
     /**
      * 新增数据。

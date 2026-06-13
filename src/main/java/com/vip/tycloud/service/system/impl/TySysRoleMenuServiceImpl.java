@@ -4,12 +4,19 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.vip.tycloud.common.dto.PageResultDTO;
+import com.vip.tycloud.entity.system.TySysRole;
 import com.vip.tycloud.entity.system.TySysRoleMenu;
 import com.vip.tycloud.repository.system.TySysRoleMenuRepository;
+import com.vip.tycloud.repository.system.TySysRoleRepository;
 import com.vip.tycloud.service.system.TySysRoleMenuService;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 /**
  * 组织与权限 功能模块 - 角色菜单关联 - 服务实现类。
@@ -19,6 +26,7 @@ import org.springframework.stereotype.Service;
 public class TySysRoleMenuServiceImpl implements TySysRoleMenuService {
 
     private final TySysRoleMenuRepository tySysRoleMenuRepository;
+    private final TySysRoleRepository tySysRoleRepository;
 
     @Override
     public TySysRoleMenu getById(Long id) {
@@ -69,6 +77,50 @@ public class TySysRoleMenuServiceImpl implements TySysRoleMenuService {
         }
         Long actualOperatorId = Objects.isNull(operatorId) ? 0L : operatorId;
         return tySysRoleMenuRepository.logicDeleteById(id, actualOperatorId) > 0;
+    }
+
+    @Override
+    public List<Long> listMenuIdsByRoleId(Long roleId) {
+        if (Objects.isNull(roleId)) {
+            return Collections.emptyList();
+        }
+        return tySysRoleMenuRepository.listByRoleId(roleId).stream()
+            .map(TySysRoleMenu::getMenuId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean assignMenus(Long roleId, List<Long> menuIds, Long operatorId) {
+        if (Objects.isNull(roleId)) {
+            return false;
+        }
+
+        Long actualOperatorId = Objects.isNull(operatorId) ? 0L : operatorId;
+        tySysRoleMenuRepository.logicDeleteByRoleId(roleId, actualOperatorId);
+
+        if (CollectionUtils.isEmpty(menuIds)) {
+            return true;
+        }
+
+        TySysRole role = tySysRoleRepository.getById(roleId);
+        Long campusId = Objects.nonNull(role) ? role.getCampusId() : null;
+        for (Long menuId : menuIds) {
+            if (Objects.isNull(menuId)) {
+                continue;
+            }
+
+            TySysRoleMenu entity = new TySysRoleMenu();
+            entity.setCampusId(campusId);
+            entity.setRoleId(roleId);
+            entity.setMenuId(menuId);
+            entity.setIsDeleted(0);
+            entity.setCreatedBy(actualOperatorId);
+            entity.setUpdatedBy(actualOperatorId);
+            tySysRoleMenuRepository.save(entity);
+        }
+        return true;
     }
 }
 

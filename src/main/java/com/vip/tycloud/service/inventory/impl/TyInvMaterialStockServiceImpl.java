@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.vip.tycloud.common.dto.PageResultDTO;
+import com.vip.tycloud.util.PageQueryUtils;
 import com.vip.tycloud.entity.inventory.TyInvMaterialStock;
 import com.vip.tycloud.repository.inventory.TyInvMaterialStockRepository;
 import com.vip.tycloud.service.inventory.TyInvMaterialStockService;
@@ -29,19 +30,16 @@ public class TyInvMaterialStockServiceImpl implements TyInvMaterialStockService 
     }
 
     @Override
-    public PageResultDTO<TyInvMaterialStock> page(Integer pageNumber, Integer pageSize) {
+    public PageResultDTO<TyInvMaterialStock> page(Integer pageNumber, Integer pageSize, String keyword, Integer status) {
         long current = Objects.isNull(pageNumber) || pageNumber < 1 ? 1L : pageNumber;
         long size = Objects.isNull(pageSize) || pageSize < 1 ? 10L : pageSize;
         Page<TyInvMaterialStock> page = new Page<>(current, size);
         IPage<TyInvMaterialStock> pageResult = tyInvMaterialStockRepository.page(
             page,
-            Wrappers.<TyInvMaterialStock>lambdaQuery()
-                .eq(TyInvMaterialStock::getIsDeleted, 0)
-                .orderByDesc(TyInvMaterialStock::getId)
+            PageQueryUtils.baseQuery(keyword, status, null, "warehouse_name")
         );
         return PageResultDTO.of(pageResult.getTotal(), pageResult.getRecords());
     }
-
     @Override
     public boolean save(TyInvMaterialStock entity) {
         if (Objects.isNull(entity)) {

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.vip.tycloud.common.dto.PageResultDTO;
+import com.vip.tycloud.util.PageQueryUtils;
 import com.vip.tycloud.entity.artwork.TyArtDamageRecord;
 import com.vip.tycloud.repository.artwork.TyArtDamageRecordRepository;
 import com.vip.tycloud.service.artwork.TyArtDamageRecordService;
@@ -29,19 +30,16 @@ public class TyArtDamageRecordServiceImpl implements TyArtDamageRecordService {
     }
 
     @Override
-    public PageResultDTO<TyArtDamageRecord> page(Integer pageNumber, Integer pageSize) {
+    public PageResultDTO<TyArtDamageRecord> page(Integer pageNumber, Integer pageSize, String keyword, Integer status) {
         long current = Objects.isNull(pageNumber) || pageNumber < 1 ? 1L : pageNumber;
         long size = Objects.isNull(pageSize) || pageSize < 1 ? 10L : pageSize;
         Page<TyArtDamageRecord> page = new Page<>(current, size);
         IPage<TyArtDamageRecord> pageResult = tyArtDamageRecordRepository.page(
             page,
-            Wrappers.<TyArtDamageRecord>lambdaQuery()
-                .eq(TyArtDamageRecord::getIsDeleted, 0)
-                .orderByDesc(TyArtDamageRecord::getId)
+            PageQueryUtils.baseQuery(keyword, status, null, "damage_level", "damage_reason", "compensation_plan")
         );
         return PageResultDTO.of(pageResult.getTotal(), pageResult.getRecords());
     }
-
     @Override
     public boolean save(TyArtDamageRecord entity) {
         if (Objects.isNull(entity)) {

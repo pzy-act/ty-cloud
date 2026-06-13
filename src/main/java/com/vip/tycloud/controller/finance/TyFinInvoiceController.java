@@ -1,7 +1,7 @@
 package com.vip.tycloud.controller.finance;
 
 import com.vip.tycloud.common.dto.ApiResponse;
-import com.vip.tycloud.common.dto.PageQueryReqDTO;
+import com.vip.tycloud.common.dto.PageFilterReqDTO;
 import com.vip.tycloud.common.dto.PageResultDTO;
 import com.vip.tycloud.dto.finance.TyFinInvoiceCreateReqDTO;
 import com.vip.tycloud.dto.finance.TyFinInvoiceRespDTO;
@@ -73,8 +73,13 @@ public class TyFinInvoiceController {
      * @return 分页结果
      */
     @PostMapping("/page")
-    public ApiResponse<PageResultDTO<TyFinInvoiceRespDTO>> page(@Valid @RequestBody PageQueryReqDTO req) {
-        PageResultDTO<TyFinInvoice> pageResult = tyFinInvoiceService.page(req.getPageNumber(), req.getPageSize());
+    public ApiResponse<PageResultDTO<TyFinInvoiceRespDTO>> page(@Valid @RequestBody PageFilterReqDTO req) {
+        PageResultDTO<TyFinInvoice> pageResult = tyFinInvoiceService.page(
+            req.getPageNumber(),
+            req.getPageSize(),
+            req.getKeyword(),
+            req.getStatus()
+        );
         List<TyFinInvoiceRespDTO> records = pageResult.getRecords().stream()
             .map(this::toRespDTO)
             .collect(Collectors.toList());

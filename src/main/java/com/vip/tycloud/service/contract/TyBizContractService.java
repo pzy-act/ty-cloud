@@ -23,7 +23,7 @@ public interface TyBizContractService {
      * @param pageSize 每页条数
      * @return 分页结果
      */
-    PageResultDTO<TyBizContract> page(Integer pageNumber, Integer pageSize);
+    PageResultDTO<TyBizContract> page(Integer pageNumber, Integer pageSize, String keyword, Integer status);
 
     /**
      * 新增数据。

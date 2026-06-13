@@ -1,7 +1,7 @@
 package com.vip.tycloud.controller.report;
 
 import com.vip.tycloud.common.dto.ApiResponse;
-import com.vip.tycloud.common.dto.PageQueryReqDTO;
+import com.vip.tycloud.common.dto.PageFilterReqDTO;
 import com.vip.tycloud.common.dto.PageResultDTO;
 import com.vip.tycloud.dto.report.TyRptDailyKpiCreateReqDTO;
 import com.vip.tycloud.dto.report.TyRptDailyKpiRespDTO;
@@ -73,8 +73,8 @@ public class TyRptDailyKpiController {
      * @return 分页结果
      */
     @PostMapping("/page")
-    public ApiResponse<PageResultDTO<TyRptDailyKpiRespDTO>> page(@Valid @RequestBody PageQueryReqDTO req) {
-        PageResultDTO<TyRptDailyKpi> pageResult = tyRptDailyKpiService.page(req.getPageNumber(), req.getPageSize());
+    public ApiResponse<PageResultDTO<TyRptDailyKpiRespDTO>> page(@Valid @RequestBody PageFilterReqDTO req) {
+        PageResultDTO<TyRptDailyKpi> pageResult = tyRptDailyKpiService.page(req.getPageNumber(), req.getPageSize(), req.getKeyword(), req.getStatus());
         List<TyRptDailyKpiRespDTO> records = pageResult.getRecords().stream()
             .map(this::toRespDTO)
             .collect(Collectors.toList());

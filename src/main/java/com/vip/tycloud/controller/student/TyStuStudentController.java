@@ -1,9 +1,9 @@
 package com.vip.tycloud.controller.student;
 
 import com.vip.tycloud.common.dto.ApiResponse;
-import com.vip.tycloud.common.dto.PageQueryReqDTO;
 import com.vip.tycloud.common.dto.PageResultDTO;
 import com.vip.tycloud.dto.student.TyStuStudentCreateReqDTO;
+import com.vip.tycloud.dto.student.TyStuStudentPageReqDTO;
 import com.vip.tycloud.dto.student.TyStuStudentRespDTO;
 import com.vip.tycloud.dto.student.TyStuStudentUpdateReqDTO;
 import com.vip.tycloud.entity.student.TyStuStudent;
@@ -73,8 +73,14 @@ public class TyStuStudentController {
      * @return 分页结果
      */
     @PostMapping("/page")
-    public ApiResponse<PageResultDTO<TyStuStudentRespDTO>> page(@Valid @RequestBody PageQueryReqDTO req) {
-        PageResultDTO<TyStuStudent> pageResult = tyStuStudentService.page(req.getPageNumber(), req.getPageSize());
+    public ApiResponse<PageResultDTO<TyStuStudentRespDTO>> page(@Valid @RequestBody TyStuStudentPageReqDTO req) {
+        PageResultDTO<TyStuStudent> pageResult = tyStuStudentService.page(
+            req.getPageNumber(),
+            req.getPageSize(),
+            req.getKeyword(),
+            req.getStatus(),
+            req.getTagId()
+        );
         List<TyStuStudentRespDTO> records = pageResult.getRecords().stream()
             .map(this::toRespDTO)
             .collect(Collectors.toList());

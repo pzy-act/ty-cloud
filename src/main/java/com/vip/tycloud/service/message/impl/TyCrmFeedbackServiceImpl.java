@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.vip.tycloud.common.dto.PageResultDTO;
+import com.vip.tycloud.common.enums.TyProgressStatusEnum;
+import com.vip.tycloud.util.PageQueryUtils;
+import com.vip.tycloud.util.StatusTransitionUtils;
 import com.vip.tycloud.entity.message.TyCrmFeedback;
 import com.vip.tycloud.repository.message.TyCrmFeedbackRepository;
 import com.vip.tycloud.service.message.TyCrmFeedbackService;
@@ -29,19 +32,16 @@ public class TyCrmFeedbackServiceImpl implements TyCrmFeedbackService {
     }
 
     @Override
-    public PageResultDTO<TyCrmFeedback> page(Integer pageNumber, Integer pageSize) {
+    public PageResultDTO<TyCrmFeedback> page(Integer pageNumber, Integer pageSize, String keyword, Integer status) {
         long current = Objects.isNull(pageNumber) || pageNumber < 1 ? 1L : pageNumber;
         long size = Objects.isNull(pageSize) || pageSize < 1 ? 10L : pageSize;
         Page<TyCrmFeedback> page = new Page<>(current, size);
         IPage<TyCrmFeedback> pageResult = tyCrmFeedbackRepository.page(
             page,
-            Wrappers.<TyCrmFeedback>lambdaQuery()
-                .eq(TyCrmFeedback::getIsDeleted, 0)
-                .orderByDesc(TyCrmFeedback::getId)
+            PageQueryUtils.baseQuery(keyword, status, "handle_status", "feedback_type", "content")
         );
         return PageResultDTO.of(pageResult.getTotal(), pageResult.getRecords());
     }
-
     @Override
     public boolean save(TyCrmFeedback entity) {
         if (Objects.isNull(entity)) {

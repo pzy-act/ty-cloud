@@ -1,16 +1,22 @@
 package com.vip.tycloud.service.system.impl;
 
+import com.vip.tycloud.dto.system.CurrentUserMenuRespDTO;
 import com.vip.tycloud.dto.system.CurrentUserRespDTO;
 import com.vip.tycloud.dto.system.LoginReqDTO;
 import com.vip.tycloud.dto.system.LoginRespDTO;
+import com.vip.tycloud.entity.system.TySysMenu;
 import com.vip.tycloud.repository.system.TySysUserRepository;
 import com.vip.tycloud.security.CustomUserDetailsService;
 import com.vip.tycloud.security.JwtTokenProvider;
 import com.vip.tycloud.security.LoginUser;
 import com.vip.tycloud.service.system.AuthService;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -162,6 +168,63 @@ public class AuthServiceImpl implements AuthService {
         List<String> permissions = loginUser.getPermissions();
         respDTO.setRoleCodes(CollectionUtils.isEmpty(roleCodes) ? Collections.emptyList() : roleCodes);
         respDTO.setPermissions(CollectionUtils.isEmpty(permissions) ? Collections.emptyList() : permissions);
+        respDTO.setMenus(buildMenuTree(tySysUserRepository.listMenusByUserId(loginUser.getUserId())));
+        return respDTO;
+    }
+
+    private List<CurrentUserMenuRespDTO> buildMenuTree(List<TySysMenu> menus) {
+        if (CollectionUtils.isEmpty(menus)) {
+            return Collections.emptyList();
+        }
+
+        Map<Long, CurrentUserMenuRespDTO> menuMap = new HashMap<>();
+        List<CurrentUserMenuRespDTO> roots = new ArrayList<>();
+        for (TySysMenu menu : menus) {
+            if (Objects.isNull(menu) || Objects.isNull(menu.getId())) {
+                continue;
+            }
+            menuMap.put(menu.getId(), toCurrentUserMenuResp(menu));
+        }
+
+        for (CurrentUserMenuRespDTO menu : menuMap.values()) {
+            Long parentId = menu.getParentId();
+            CurrentUserMenuRespDTO parent = Objects.nonNull(parentId) ? menuMap.get(parentId) : null;
+            if (Objects.nonNull(parent)) {
+                parent.getChildren().add(menu);
+            } else {
+                roots.add(menu);
+            }
+        }
+
+        sortMenus(roots);
+        return roots;
+    }
+
+    private void sortMenus(List<CurrentUserMenuRespDTO> menus) {
+        if (CollectionUtils.isEmpty(menus)) {
+            return;
+        }
+
+        menus.sort(Comparator
+            .comparing((CurrentUserMenuRespDTO item) -> Objects.isNull(item.getSortNo()) ? 0 : item.getSortNo())
+            .thenComparing(item -> Objects.isNull(item.getId()) ? 0L : item.getId()));
+        for (CurrentUserMenuRespDTO menu : menus) {
+            sortMenus(menu.getChildren());
+        }
+    }
+
+    private CurrentUserMenuRespDTO toCurrentUserMenuResp(TySysMenu menu) {
+        CurrentUserMenuRespDTO respDTO = new CurrentUserMenuRespDTO();
+        respDTO.setId(menu.getId());
+        respDTO.setParentId(menu.getParentId());
+        respDTO.setMenuName(menu.getMenuName());
+        respDTO.setMenuType(menu.getMenuType());
+        respDTO.setRoutePath(menu.getRoutePath());
+        respDTO.setComponent(menu.getComponent());
+        respDTO.setPerms(menu.getPerms());
+        respDTO.setIcon(menu.getIcon());
+        respDTO.setSortNo(menu.getSortNo());
+        respDTO.setChildren(new ArrayList<>());
         return respDTO;
     }
 }

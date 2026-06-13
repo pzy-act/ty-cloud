@@ -42,6 +42,14 @@ public interface TyCrmLeadService {
     boolean updateById(TyCrmLead entity);
 
     /**
+     * Convert lead to student.
+     *
+     * @param leadId lead id
+     * @return student id
+     */
+    Long convertToStudent(Long leadId);
+
+    /**
      * 逻辑删除。
      *
      * @param id 主键ID

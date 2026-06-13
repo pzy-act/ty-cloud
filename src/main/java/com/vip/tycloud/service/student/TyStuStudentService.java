@@ -26,6 +26,18 @@ public interface TyStuStudentService {
     PageResultDTO<TyStuStudent> page(Integer pageNumber, Integer pageSize);
 
     /**
+     * Filtered page query.
+     *
+     * @param pageNumber page number
+     * @param pageSize page size
+     * @param keyword keyword
+     * @param status student status
+     * @param tagId tag id
+     * @return page result
+     */
+    PageResultDTO<TyStuStudent> page(Integer pageNumber, Integer pageSize, String keyword, Integer status, Long tagId);
+
+    /**
      * 新增数据。
      *
      * @param entity 实体对象

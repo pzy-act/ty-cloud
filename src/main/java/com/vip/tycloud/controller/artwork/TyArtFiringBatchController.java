@@ -1,7 +1,7 @@
 package com.vip.tycloud.controller.artwork;
 
 import com.vip.tycloud.common.dto.ApiResponse;
-import com.vip.tycloud.common.dto.PageQueryReqDTO;
+import com.vip.tycloud.common.dto.PageFilterReqDTO;
 import com.vip.tycloud.common.dto.PageResultDTO;
 import com.vip.tycloud.dto.artwork.TyArtFiringBatchCreateReqDTO;
 import com.vip.tycloud.dto.artwork.TyArtFiringBatchRespDTO;
@@ -73,8 +73,8 @@ public class TyArtFiringBatchController {
      * @return 分页结果
      */
     @PostMapping("/page")
-    public ApiResponse<PageResultDTO<TyArtFiringBatchRespDTO>> page(@Valid @RequestBody PageQueryReqDTO req) {
-        PageResultDTO<TyArtFiringBatch> pageResult = tyArtFiringBatchService.page(req.getPageNumber(), req.getPageSize());
+    public ApiResponse<PageResultDTO<TyArtFiringBatchRespDTO>> page(@Valid @RequestBody PageFilterReqDTO req) {
+        PageResultDTO<TyArtFiringBatch> pageResult = tyArtFiringBatchService.page(req.getPageNumber(), req.getPageSize(), req.getKeyword(), req.getStatus());
         List<TyArtFiringBatchRespDTO> records = pageResult.getRecords().stream()
             .map(this::toRespDTO)
             .collect(Collectors.toList());

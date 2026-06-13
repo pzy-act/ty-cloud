@@ -1,7 +1,7 @@
 package com.vip.tycloud.controller.inventory;
 
 import com.vip.tycloud.common.dto.ApiResponse;
-import com.vip.tycloud.common.dto.PageQueryReqDTO;
+import com.vip.tycloud.common.dto.PageFilterReqDTO;
 import com.vip.tycloud.common.dto.PageResultDTO;
 import com.vip.tycloud.dto.inventory.TyInvPurchaseOrderCreateReqDTO;
 import com.vip.tycloud.dto.inventory.TyInvPurchaseOrderRespDTO;
@@ -73,8 +73,8 @@ public class TyInvPurchaseOrderController {
      * @return 分页结果
      */
     @PostMapping("/page")
-    public ApiResponse<PageResultDTO<TyInvPurchaseOrderRespDTO>> page(@Valid @RequestBody PageQueryReqDTO req) {
-        PageResultDTO<TyInvPurchaseOrder> pageResult = tyInvPurchaseOrderService.page(req.getPageNumber(), req.getPageSize());
+    public ApiResponse<PageResultDTO<TyInvPurchaseOrderRespDTO>> page(@Valid @RequestBody PageFilterReqDTO req) {
+        PageResultDTO<TyInvPurchaseOrder> pageResult = tyInvPurchaseOrderService.page(req.getPageNumber(), req.getPageSize(), req.getKeyword(), req.getStatus());
         List<TyInvPurchaseOrderRespDTO> records = pageResult.getRecords().stream()
             .map(this::toRespDTO)
             .collect(Collectors.toList());

@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.vip.tycloud.common.dto.PageResultDTO;
+import com.vip.tycloud.common.enums.TyProgressStatusEnum;
+import com.vip.tycloud.util.PageQueryUtils;
+import com.vip.tycloud.util.StatusTransitionUtils;
 import com.vip.tycloud.entity.artwork.TyArtFiringBatch;
 import com.vip.tycloud.repository.artwork.TyArtFiringBatchRepository;
 import com.vip.tycloud.service.artwork.TyArtFiringBatchService;
@@ -29,19 +32,16 @@ public class TyArtFiringBatchServiceImpl implements TyArtFiringBatchService {
     }
 
     @Override
-    public PageResultDTO<TyArtFiringBatch> page(Integer pageNumber, Integer pageSize) {
+    public PageResultDTO<TyArtFiringBatch> page(Integer pageNumber, Integer pageSize, String keyword, Integer status) {
         long current = Objects.isNull(pageNumber) || pageNumber < 1 ? 1L : pageNumber;
         long size = Objects.isNull(pageSize) || pageSize < 1 ? 10L : pageSize;
         Page<TyArtFiringBatch> page = new Page<>(current, size);
         IPage<TyArtFiringBatch> pageResult = tyArtFiringBatchRepository.page(
             page,
-            Wrappers.<TyArtFiringBatch>lambdaQuery()
-                .eq(TyArtFiringBatch::getIsDeleted, 0)
-                .orderByDesc(TyArtFiringBatch::getId)
+            PageQueryUtils.baseQuery(keyword, status, "status", "batch_no", "kiln_name", "fire_type")
         );
         return PageResultDTO.of(pageResult.getTotal(), pageResult.getRecords());
     }
-
     @Override
     public boolean save(TyArtFiringBatch entity) {
         if (Objects.isNull(entity)) {

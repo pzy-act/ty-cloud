@@ -2,6 +2,7 @@ package com.vip.tycloud.service.system;
 
 import com.vip.tycloud.common.dto.PageResultDTO;
 import com.vip.tycloud.entity.system.TySysUserRole;
+import java.util.List;
 
 /**
  * 组织与权限 功能模块 - 用户角色关联 - 服务接口。
@@ -24,6 +25,10 @@ public interface TySysUserRoleService {
      * @return 分页结果
      */
     PageResultDTO<TySysUserRole> page(Integer pageNumber, Integer pageSize);
+
+    List<Long> listRoleIdsByUserId(Long userId);
+
+    boolean assignRoles(Long userId, List<Long> roleIds, Long operatorId);
 
     /**
      * 新增数据。

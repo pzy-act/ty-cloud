@@ -1,7 +1,7 @@
 package com.vip.tycloud.controller.contract;
 
 import com.vip.tycloud.common.dto.ApiResponse;
-import com.vip.tycloud.common.dto.PageQueryReqDTO;
+import com.vip.tycloud.common.dto.PageFilterReqDTO;
 import com.vip.tycloud.common.dto.PageResultDTO;
 import com.vip.tycloud.dto.contract.TyBizContractCreateReqDTO;
 import com.vip.tycloud.dto.contract.TyBizContractRespDTO;
@@ -73,8 +73,13 @@ public class TyBizContractController {
      * @return 分页结果
      */
     @PostMapping("/page")
-    public ApiResponse<PageResultDTO<TyBizContractRespDTO>> page(@Valid @RequestBody PageQueryReqDTO req) {
-        PageResultDTO<TyBizContract> pageResult = tyBizContractService.page(req.getPageNumber(), req.getPageSize());
+    public ApiResponse<PageResultDTO<TyBizContractRespDTO>> page(@Valid @RequestBody PageFilterReqDTO req) {
+        PageResultDTO<TyBizContract> pageResult = tyBizContractService.page(
+            req.getPageNumber(),
+            req.getPageSize(),
+            req.getKeyword(),
+            req.getStatus()
+        );
         List<TyBizContractRespDTO> records = pageResult.getRecords().stream()
             .map(this::toRespDTO)
             .collect(Collectors.toList());

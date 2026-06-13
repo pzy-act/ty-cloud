@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.vip.tycloud.common.dto.PageResultDTO;
+import com.vip.tycloud.util.PageQueryUtils;
 import com.vip.tycloud.entity.artwork.TyArtGlazeRecord;
 import com.vip.tycloud.repository.artwork.TyArtGlazeRecordRepository;
 import com.vip.tycloud.service.artwork.TyArtGlazeRecordService;
@@ -29,19 +30,16 @@ public class TyArtGlazeRecordServiceImpl implements TyArtGlazeRecordService {
     }
 
     @Override
-    public PageResultDTO<TyArtGlazeRecord> page(Integer pageNumber, Integer pageSize) {
+    public PageResultDTO<TyArtGlazeRecord> page(Integer pageNumber, Integer pageSize, String keyword, Integer status) {
         long current = Objects.isNull(pageNumber) || pageNumber < 1 ? 1L : pageNumber;
         long size = Objects.isNull(pageSize) || pageSize < 1 ? 10L : pageSize;
         Page<TyArtGlazeRecord> page = new Page<>(current, size);
         IPage<TyArtGlazeRecord> pageResult = tyArtGlazeRecordRepository.page(
             page,
-            Wrappers.<TyArtGlazeRecord>lambdaQuery()
-                .eq(TyArtGlazeRecord::getIsDeleted, 0)
-                .orderByDesc(TyArtGlazeRecord::getId)
+            PageQueryUtils.baseQuery(keyword, status, null, "glaze_color_code", "glaze_color_name", "remark")
         );
         return PageResultDTO.of(pageResult.getTotal(), pageResult.getRecords());
     }
-
     @Override
     public boolean save(TyArtGlazeRecord entity) {
         if (Objects.isNull(entity)) {

@@ -1,6 +1,7 @@
 package com.vip.tycloud.repository.system;
 
 import com.vip.tycloud.common.repository.BaseRepository;
+import com.vip.tycloud.entity.system.TySysMenu;
 import com.vip.tycloud.entity.system.TySysUser;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,6 +34,14 @@ public interface TySysUserRepository extends BaseRepository<TySysUser> {
      * @return 权限标识列表
      */
     List<String> listPermsByUserId(Long userId);
+
+    /**
+     * 查询用户授权菜单列表。
+     *
+     * @param userId 用户ID
+     * @return 授权菜单列表
+     */
+    List<TySysMenu> listMenusByUserId(Long userId);
 
     /**
      * 更新最近登录时间。

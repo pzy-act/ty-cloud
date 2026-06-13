@@ -38,4 +38,6 @@ public class CurrentUserRespDTO {
      * 权限标识列表。
      */
     private List<String> permissions;
+
+    private List<CurrentUserMenuRespDTO> menus;
 }

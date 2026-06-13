@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.vip.tycloud.common.dto.PageResultDTO;
+import com.vip.tycloud.common.enums.TyMessageTaskStatusEnum;
+import com.vip.tycloud.util.PageQueryUtils;
+import com.vip.tycloud.util.StatusTransitionUtils;
 import com.vip.tycloud.entity.message.TyMsgTask;
 import com.vip.tycloud.repository.message.TyMsgTaskRepository;
 import com.vip.tycloud.service.message.TyMsgTaskService;
@@ -29,19 +32,16 @@ public class TyMsgTaskServiceImpl implements TyMsgTaskService {
     }
 
     @Override
-    public PageResultDTO<TyMsgTask> page(Integer pageNumber, Integer pageSize) {
+    public PageResultDTO<TyMsgTask> page(Integer pageNumber, Integer pageSize, String keyword, Integer status) {
         long current = Objects.isNull(pageNumber) || pageNumber < 1 ? 1L : pageNumber;
         long size = Objects.isNull(pageSize) || pageSize < 1 ? 10L : pageSize;
         Page<TyMsgTask> page = new Page<>(current, size);
         IPage<TyMsgTask> pageResult = tyMsgTaskRepository.page(
             page,
-            Wrappers.<TyMsgTask>lambdaQuery()
-                .eq(TyMsgTask::getIsDeleted, 0)
-                .orderByDesc(TyMsgTask::getId)
+            PageQueryUtils.baseQuery(keyword, status, "status", "task_no", "send_type", "target_type", "content_snapshot")
         );
         return PageResultDTO.of(pageResult.getTotal(), pageResult.getRecords());
     }
-
     @Override
     public boolean save(TyMsgTask entity) {
         if (Objects.isNull(entity)) {

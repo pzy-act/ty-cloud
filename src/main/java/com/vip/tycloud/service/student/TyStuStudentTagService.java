@@ -2,6 +2,7 @@ package com.vip.tycloud.service.student;
 
 import com.vip.tycloud.common.dto.PageResultDTO;
 import com.vip.tycloud.entity.student.TyStuStudentTag;
+import java.util.List;
 
 /**
  * 学员管理 功能模块 - 学员标签关联 - 服务接口。
@@ -26,12 +27,28 @@ public interface TyStuStudentTagService {
     PageResultDTO<TyStuStudentTag> page(Integer pageNumber, Integer pageSize);
 
     /**
+     * 按学员ID查询。
+     *
+     * @param studentId 学员ID
+     * @return 关联列表
+     */
+    List<TyStuStudentTag> listByStudentId(Long studentId);
+
+    /**
      * 新增数据。
      *
      * @param entity 实体对象
      * @return 是否成功
      */
     boolean save(TyStuStudentTag entity);
+
+    /**
+     * 绑定标签。
+     *
+     * @param entity 实体对象
+     * @return 是否成功
+     */
+    boolean bind(TyStuStudentTag entity);
 
     /**
      * 按主键更新。

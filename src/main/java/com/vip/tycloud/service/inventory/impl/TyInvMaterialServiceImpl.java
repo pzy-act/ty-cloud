@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.vip.tycloud.common.dto.PageResultDTO;
+import com.vip.tycloud.common.enums.TyBaseStatusEnum;
+import com.vip.tycloud.util.PageQueryUtils;
+import com.vip.tycloud.util.StatusTransitionUtils;
 import com.vip.tycloud.entity.inventory.TyInvMaterial;
 import com.vip.tycloud.repository.inventory.TyInvMaterialRepository;
 import com.vip.tycloud.service.inventory.TyInvMaterialService;
@@ -29,19 +32,16 @@ public class TyInvMaterialServiceImpl implements TyInvMaterialService {
     }
 
     @Override
-    public PageResultDTO<TyInvMaterial> page(Integer pageNumber, Integer pageSize) {
+    public PageResultDTO<TyInvMaterial> page(Integer pageNumber, Integer pageSize, String keyword, Integer status) {
         long current = Objects.isNull(pageNumber) || pageNumber < 1 ? 1L : pageNumber;
         long size = Objects.isNull(pageSize) || pageSize < 1 ? 10L : pageSize;
         Page<TyInvMaterial> page = new Page<>(current, size);
         IPage<TyInvMaterial> pageResult = tyInvMaterialRepository.page(
             page,
-            Wrappers.<TyInvMaterial>lambdaQuery()
-                .eq(TyInvMaterial::getIsDeleted, 0)
-                .orderByDesc(TyInvMaterial::getId)
+            PageQueryUtils.baseQuery(keyword, status, "status", "material_code", "material_name", "material_type", "unit", "spec")
         );
         return PageResultDTO.of(pageResult.getTotal(), pageResult.getRecords());
     }
-
     @Override
     public boolean save(TyInvMaterial entity) {
         if (Objects.isNull(entity)) {

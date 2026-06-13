@@ -23,7 +23,7 @@ public interface TyInvPurchaseOrderService {
      * @param pageSize 每页条数
      * @return 分页结果
      */
-    PageResultDTO<TyInvPurchaseOrder> page(Integer pageNumber, Integer pageSize);
+    PageResultDTO<TyInvPurchaseOrder> page(Integer pageNumber, Integer pageSize, String keyword, Integer status);
 
     /**
      * 新增数据。
